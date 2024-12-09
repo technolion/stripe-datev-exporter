@@ -117,6 +117,10 @@ class StripeDatevCli(object):
 
     records = []
     for revenue_item in revenue_items:
+
+      # Exclude revenue items that have no accounbting properties
+      if revenue_item["accounting_props"] is None:
+        continue
       records += stripe_datev.invoices.createAccountingRecords(revenue_item)
 
     records_by_month = {}
@@ -147,6 +151,11 @@ class StripeDatevCli(object):
       os.mkdir(pdfDir)
 
     for invoice in invoices:
+
+      # Exclude PDFs that have a total of 0
+      if invoice.total == 0:
+        continue
+
       pdfLink = invoice.invoice_pdf
       finalized_date = datetime.fromtimestamp(
         invoice.status_transitions.finalized_at, timezone.utc).astimezone(stripe_datev.config.accounting_tz)

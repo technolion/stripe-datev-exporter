@@ -24,6 +24,8 @@ def listFinalizedInvoices(fromTime, toTime):
   for invoice in invoices:
     if invoice.status == "draft":
       continue
+    if invoice.total == 0:
+      continue
     finalized_date = datetime.fromtimestamp(
       invoice.status_transitions.finalized_at, timezone.utc).astimezone(config.accounting_tz)
     if finalized_date < fromTime or finalized_date >= toTime:
@@ -106,6 +108,9 @@ def createRevenueItems(invs):
   for invoice in invs:
     if invoice["metadata"].get("stripe-datev-exporter:ignore", "false") == "true":
       print("Skipping invoice {} (ignore)".format(invoice.id))
+      continue
+
+    if invoice.total == 0:
       continue
 
     voided_at = None
@@ -351,8 +356,16 @@ def to_csv(inv):
   for invoice in inv:
     if invoice.status == "void":
       continue
+    if invoice.status == "draft":
+      continue
+    if invoice.total == 0:
+      continue
     cus = customer.retrieveCustomer(invoice.customer)
     props = customer.getAccountingProps(cus, invoice=invoice)
+
+    # Exclude customers who have no properties
+    if props is None:
+      continue
 
     total = decimal.Decimal(invoice.total) / 100
     tax = decimal.Decimal(invoice.tax) / 100 if invoice.tax else None

@@ -81,6 +81,9 @@ def getAccountingProps(customer, invoice=None, checkout_session=None):
   props = {
     "vat_region": "World",
   }
+  if not hasattr(customer, 'metadata'):
+    print("Customer " + customer.id + " has no metadata")
+    return
 
   if (invoice is None or datetime.fromtimestamp(invoice.status_transitions.finalized_at, timezone.utc) >= datetime(2022, 1, 1, 0, 0).astimezone(config.accounting_tz)):
     if not customer.metadata.get("accountNumber", None):

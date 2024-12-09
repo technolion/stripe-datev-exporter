@@ -30,6 +30,10 @@ def createAccountingRecords(balance_transactions):
       charge = tx.source
       cus = customer.retrieveCustomer(charge.customer)
       accounting_props = customer.getAccountingProps(cus)
+
+      if accounting_props is None:
+        continue
+
       if charge.invoice:
         number = charge.invoice.number
       else:
@@ -75,6 +79,10 @@ def createAccountingRecords(balance_transactions):
       charge = tx.source.charge
       cus = customer.retrieveCustomer(charge.customer)
       accounting_props = customer.getAccountingProps(cus)
+
+      if accounting_props is None:
+        continue
+
       if charge.invoice:
         number = charge.invoice.number
       else:
